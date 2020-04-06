@@ -1,0 +1,80 @@
+﻿
+@{
+    ViewBag.Title = "Add";
+}
+
+<h2>Add</h2>
+<script src="~/Content/BandSel.js"></script>
+<table class="table-bordered table">
+    <tr>
+        <td>产品名称：</td>
+        <td><input id="txtName" type="text" /></td>
+    </tr>
+    <tr>
+        <td>产品类别：</td>
+        <td>
+            <select id="typeId"></select>
+        </td>
+    </tr>
+    <tr>
+        <td>产品价格：</td>
+        <td><input id="txtPrice" type="text" /></td>
+    </tr>
+    <tr>
+        <td>产品供应商：</td>
+        <td>
+            <select id="SupplierId"></select>
+        </td>
+    </tr>
+    <tr>
+        <td>备注：</td>
+        <td>
+            <textarea id="txtRemark" rows="10" cols="20"></textarea>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>
+            <input id="Button1" type="button" value="保存" class="btn-danger btn" onclick="SaveData()" />
+            <input id="Button1" type="button" value="关闭" class="btn-danger btn" />
+        </td>
+    </tr>
+</table>
+
+<script>
+    //  http://localhost:8481/api/Good/BandType
+    function SaveData() {
+        //取界面值
+        var GName = $("#txtName").val();
+        var TypeId = $("#typeId").val();
+        var Gprice = $("#txtPrice").val();
+        var SupplierId = $("#SupplierId").val();
+        var remark = $("#txtRemark").val();
+        //判断非空
+        if (GName == "") {
+            alert("商品名称不能为空！");
+            return;
+        }
+        if (Gprice == "") {
+            alert("商品价格不能为空！");
+            return;
+        }
+        var o = {
+            GName: GName,
+            TypeId: TypeId,
+            Gprice: Gprice,
+            SupplierId: SupplierId,
+            remark: remark,
+        }
+        //传到api
+        $.ajax({
+            url: "http://localhost:8481/api/Good/Add?o=" + JSON.stringify(o),
+            type: "post",
+            success: function (d) {
+                if (d > 0) {
+                    alert("添加成功"); location.href = '/Good/Show';
+                }
+            }
+        })
+    }
+</script>

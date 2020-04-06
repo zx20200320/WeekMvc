@@ -1,0 +1,109 @@
+﻿
+@{
+    ViewBag.Title = "Show";
+}
+
+<h2>Show</h2>
+<script src="~/Content/BandSel.js"></script>
+
+<table>
+    <tr>
+        <td><input id="txtName" type="text" class="form-control" /></td>
+        <td><select id="typeId" class="form-control">
+            <option value="0">--请选择--</option>
+            </select></td>
+        <td><select id="SupplierId" class="form-control">
+                <option value="0">--请选择--</option>
+            </select></td>
+        <td><input id="Button1" type="button" value="查询" onclick="Select()"  class="btn-warning btn"/>
+            <input id="Button1" type="button" value="添加" onclick="location.assign('/Good/Add')"  class="btn-warning btn" />
+            <input id="Button1" type="button" value="批量删除" onclick="del(-1)" class="btn-danger btn" />
+        </td>
+    </tr>
+</table>
+
+
+<table id="dataTable" class="table-bordered table table-hover">
+    <tr  style="background-color:#808080;color:white">
+        <th><input id="ckAll" type="checkbox" /></th>
+        <th>编号</th>
+        <th>产品名称</th>
+        <th>产品类别</th>
+        <th>产品价格</th>
+        <th>供应商</th>
+        <th>备注</th>
+        <th>操作</th>
+    </tr>
+</table>
+<script>
+    Select();//显示
+    //查询
+    function Select() {
+        var where = "?t=1";//默认传值
+        if ($("#txtName").val()!="") {//判断商品名是否为空
+            where += "&GoodName=" + $("#txtName").val();
+        }
+        if ($("#typeId").val() != "0") {//判断分类id
+            where += "&TypeId=" + $("#typeId").val();
+        }
+        if ($("#SupplierId").val() != "0") {//判断供应商id
+            where += "&SupplierId=" + $("#SupplierId").val();
+        }
+        $.ajax({
+            url: "http://localhost:8481/api/Good/Show"+where,
+            success: function (d) {
+                $("[name=tr]").remove();//清空之前追加的行
+                $(d).each(function () {
+                    var tr = '<tr name="tr">'
+                         + '<td><input id="Checkbox1" type="checkbox" name="ckItem" value="' + this.Id + '" /></td>'
+                        + '<td>' + this.Id + '</td>'
+                        + '<td>' + this.GName + '</td>'
+                        + '<td>' + this.GoodType.TypeName + '</td>'
+                        + '<td>' + this.Gprice + '</td>'
+                        + '<td>' + this.Supplier.SupplierName + '</td>'
+                        + '<td>' + (this.remark.length > 9 ? this.remark.substr(0, 9) + "..." : this.remark) + '</td>'
+                        + '<td><input id="Button1" type="button" value="删除" class="btn-danger btn" onclick="del(' + this.Id + ',this)" /><input id="Button1" type="button" value="修改" class="btn-danger btn" onclick="update('+this.Id+')"/></td>'
+                        + '</tr>';
+                    $("#dataTable").append(tr);
+                })
+            }
+        })
+    }
+    //修改
+    function update(id) {
+        location.href = "/Good/update/" + id;
+    }
+
+    //单删
+    function del(id, obj) {
+        if (confirm("真的要删除吗？")) {
+            var gid = "";//要删除的id
+            var ids = [];//获取所有选中的id
+            if (id == -1) {//批量删除取id
+                $("[name=ckItem]:checked").each(function () {//遍历所有选中的复选框
+                    ids.push(this.value);
+                    $(this).parent().parent().remove();//选中的行移除
+                })
+                gid = ids.toString();
+            } else {//单删取id
+                gid = id;
+                $(obj).parent().parent().remove();//点击的行删除
+            }
+            $.ajax({
+                url: "http://localhost:8481/api/Good/Delete/" + gid,
+                type: "post",
+                success: function (d) {
+                    if (d > 0) {
+                        alert("删除成功");
+                    }
+                }
+            })
+        }
+    }
+
+    //全选
+    $("#ckAll").click(function () {
+        $("[name=ckItem]").prop("checked", this.checked);
+    })
+
+</script>
